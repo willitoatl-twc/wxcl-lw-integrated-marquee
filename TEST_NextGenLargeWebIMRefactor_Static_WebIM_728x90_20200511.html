@@ -1,0 +1,1276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Next Gen Large Web IM Refactor</title>
+  <!-- NERFED -->
+  <script src='https://s.w-x.co/cl/jquery/promises.js'></script>
+  <!-- END NERFED -->
+<style type="text/css" id="labCSS" rel="stylesheet">
+    #labBG{
+        position: absolute;
+        width: 100%;
+        margin: 0;
+        background-repeat: no-repeat;
+        overflow: hidden;
+        z-index: 0;
+    }
+
+    #labContent {
+        display: block;
+        position: relative;
+        font-size:14px;
+        z-index: 0;
+        margin: 0 auto;
+        opacity: 1;
+        filter: alpha(opacity=100);
+        -webkit-transition: height 1.5s ease-out;
+        transition: height 1.5s ease-out;
+    /*NERFED*/
+        max-width:1200px;
+    }
+    #labContentClick{position: absolute; z-index: 0;top: 0;bottom: 0;left: 0;right: 0;cursor:pointer;}
+    #labContentOpen{opacity:0;filter: alpha(opacity=0); -webkit-transition: opacity .75s ease-in; transition: opacity .75s ease-in;}
+    #labContentClosed{opacity:0;filter: alpha(opacity=0); -webkit-transition: opacity .75s ease-in; transition: opacity .75s ease-in;}
+    #labfgOpen, #labfgClose {
+        position: absolute;
+        height: auto;
+        cursor: pointer;
+        max-width: none;
+    }
+
+    #labBtnClose{
+        position: absolute;
+        z-index: 1;
+        width: 22px;
+        height: auto;
+        margin: 0;
+        cursor: pointer;
+        color: #fff;
+        font-size: 2rem;
+        right:15px;
+        top:10px;
+    }
+
+    #labBtnExpand{
+        position: absolute;
+        margin: auto;
+        top: 0;
+        bottom: 0;
+        left: 20px;
+        cursor: pointer;
+        width: 116px;
+        max-width: none;
+    }
+
+    #labfgOpen {
+        width: 1980px;
+        left: 50%;
+        top: 50%;
+        -webkit-transform: translateY(-50%) translateX(-50%);
+        transform: translateY(-50%) translateX(-50%);
+    }
+
+    #labfgClose {
+        width: 1980px;
+        left: 50%;
+        top: 50%;
+        -webkit-transform: translateY(-50%) translateX(-50%);
+        transform: translateY(-50%) translateX(-50%);
+    }
+
+    @media (min-width: 0px) and (max-width: 767px) {
+        /* Hide when too narrow or too wide */
+        #labBG, #labContent {
+            display: none;
+        }
+    }
+
+    @media (min-width: 768px) and (max-width: 984px) {
+
+        #labBG{background-position: 50% 87%}
+
+        #labfgOpen {
+            width: 984px;
+        }
+
+        #labfgClose {
+            width: 984px;
+        }
+
+    }
+
+    @media (min-width: 985px) and (max-width: 1200px) {
+
+        #labBG{background-position: 50% 87%}
+
+        #labfgOpen {
+            width: 1200px;
+        }
+
+        #labfgClose {
+            width: 1200px;
+        }
+
+    }
+
+    @media (min-width: 1201px) and (max-width: 1980px) {
+
+        #labBG{background-position: 50% 87%}
+
+        #labfgOpen {
+            width: 1980px;
+        }
+
+        #labfgClose {
+            width: 1980px;
+        }
+    }
+    .lab-trans{-webkit-transition: all .6s ease-out;transition: all .6s ease-out;}
+    .lab-center{top:0; bottom: 0; right:0; left:0;margin:auto;}
+  .lab-arrow-down:before{content: "\21e9";}
+</style>
+</head>
+<body>
+<!-- START NO REFRESH CODE -->
+<script type="text/javascript">
+  try{
+parent.window.TWC=parent.window.TWC || {};
+  parent.window.TWC.adUtils=parent.window.TWC.adUtils || {};
+ parent.window.TWC.adUtils.killRefresh= parent.window.TWC.adUtils.killRefresh || [];
+parent.TWC.adUtils.killRefresh.push('%%PATTERN:pos%%');}catch(err){console.log(err);}
+</script>
+<!-- END NO REFRESH CODE -->
+<div id="main" style="display:none;">
+<!--TRACKING-->
+<img id="labTracking" src="" alt="impression tracking pixel">
+<!-- NOTE - MB Study Tracking -->
+<!--BG-->
+    <div id="labBG"></div>
+
+<!--CONTENT-->
+    <div id="labContent" class="center-col">
+        <!--Content Click-->
+        <div id="labContentClick"></div>
+        <div id="labContentOpen">
+            <img src="" id="labfgOpen">
+            <img src="" id="labBtnClose">
+        </div>
+        <div id="labContentClosed">
+            <img src="" id="labfgClose">
+      			<img src="" id="labBtnExpand">
+        </div>
+    </div>
+    <!--CONTENT END-->
+</div>
+
+<!--DEFAULT-->
+<div id="labDefault" style='display:none;'></div>
+<script>
+    /*GLOBAL OBJECTS*/
+
+    var lA = {}; // initialized in defineAd or showDefault
+    var lC = {
+        adaptor:{
+            on:true,
+            cond:"" // possible - cond: clear, clearnight, cloudy, cloudynight, rainy, rainynight, wintry, wintrynight
+        },
+        adType:"Hi Impact BBG",
+        name: "Next-Gen-Large-Web-IM-Refactor",
+        alt: "Next-Gen-Large-Web-IM-Refactor",
+        dir: "https://s.w-x.co/cl/prototype/dcp106-lw-im-stc/",
+        anim:{
+            easeOpen:"ease-out", // ease-in, ease-out,
+            easeClose:"ease-in", // ease-in, ease-out,
+            timeToOpen:"1s",
+            timeToClose:"500ms"
+        },
+        els:{
+            bg:{
+                bgPos:"center top",
+                id:"labBG",
+                hOpen:516,
+                hClosed:90, // changed the value from 516 to 90 - it will be the height of the bg on callapse state - wodev comment
+                hPctOpen:.9,
+                hPctClosed:.6,
+                imgProps:{type:"bg", css:"" },
+                img:					{small: 'sm-bg-open-all.jpg' , medium: 'md-bg-open-all.jpg', large: 'lg-bg-open-all.jpg'} // for open background image - wodev comment
+            },
+            bgClose:{
+                bgPos:"center top",
+                id:"labBG",
+                hOpen:516,
+                hClosed:90,
+                hPctOpen:.9,
+                hPctClosed:.6,
+                imgProps:{type:"bgClose", css:"" },
+                img:					{small: 'sm-bg-closed-all.jpg' , medium: 'md-bg-closed-all.jpg', large: 'lg-bg-closed-all.jpg'} // added this for closed background image - wodev comment
+            },
+            content:{
+                id:"labContent",
+                hOpen:330, // changed expand/open content height from 300px to 330px -wodev comment
+                hClosed:90, // changed collapse/closed content height from 95px to 90px -wodev comment
+                hPctOpen:.6,
+                hPctClosed:.1
+            },
+            contentClick:{id:"labContentClick", click:exitClick},
+            contentOpen:{id:"labContentOpen"},
+            contentClosed:{id:"labContentClosed"},
+            labfgClose:{
+                id:"labfgClose",
+                click:exitClick,
+                imgProps:{type:"img", css:"" },
+                className:"",
+                img:					{small: 'sm-fg-closed-cld-d.png' , medium: 'md-fg-closed-cld-d.png', large: 'lg-fg-closed-cld-d.png'}, // default image (Cloudy) - wodev comment
+                cloudy:				{small: 'sm-fg-closed-cld-d.png' , medium: 'md-fg-closed-cld-d.png', large: 'lg-fg-closed-cld-d.png'},
+                cloudynight:	{small: 'sm-fg-closed-cld-n.png' , medium: 'md-fg-closed-cld-n.png', large: 'lg-fg-closed-cld-n.png'},
+                clear:				{small: 'sm-fg-closed-clr-d.png' , medium: 'md-fg-closed-clr-d.png', large: 'lg-fg-closed-clr-d.png'},
+                clearnight:		{small: 'sm-fg-closed-clr-n.png' , medium: 'md-fg-closed-clr-n.png', large: 'lg-fg-closed-clr-n.png'},
+                rainy:				{small: 'sm-fg-closed-rain-d.png' , medium: 'md-fg-closed-rain-d.png', large: 'lg-fg-closed-rain-d.png'},
+                rainynight:	  {small: 'sm-fg-closed-rain-n.png' , medium: 'md-fg-closed-rain-n.png', large: 'lg-fg-closed-rain-n.png'},
+                wintry:				{small: 'sm-fg-closed-snow-d.png' , medium: 'md-fg-closed-snow-d.png', large: 'lg-fg-closed-snow-d.png'},
+                wintrynight:	{small: 'sm-fg-closed-snow-n.png' , medium: 'md-fg-closed-snow-n.png', large: 'lg-fg-closed-snow-n.png'}
+            },
+            labfgOpen:{
+                id:"labfgOpen",
+                click:exitClick,
+                imgProps:{type:"img", css:"" },
+                className:"",
+                img:					{small: 'sm-fg-open-cld-d.png' , medium: 'md-fg-open-cld-d.png', large: 'lg-fg-open-cld-d.png'}, // default image (Cloudy) - wodev comment
+        		    cloudy:				{small: 'sm-fg-open-cld-d.png' , medium: 'md-fg-open-cld-d.png', large: 'lg-fg-open-cld-d.png'},
+                cloudynight:	{small: 'sm-fg-open-cld-n.png' , medium: 'md-fg-open-cld-n.png', large: 'lg-fg-open-cld-n.png'},
+        				clear:				{small: 'sm-fg-open-clr-d.png' , medium: 'md-fg-open-clr-d.png', large: 'lg-fg-open-clr-d.png'},
+                clearnight:		{small: 'sm-fg-open-clr-n.png' , medium: 'md-fg-open-clr-n.png', large: 'lg-fg-open-clr-n.png'},
+                rainy:				{small: 'sm-fg-open-rain-d.png' , medium: 'md-fg-open-rain-d.png', large: 'lg-fg-open-rain-d.png'},
+                rainynight:	  {small: 'sm-fg-open-rain-n.png' , medium: 'md-fg-open-rain-n.png', large: 'lg-fg-open-rain-n.png'},
+                wintry:				{small: 'sm-fg-open-snow-d.png' , medium: 'md-fg-open-snow-d.png', large: 'lg-fg-open-snow-d.png'},
+                wintrynight:	{small: 'sm-fg-open-snow-n.png' , medium: 'md-fg-open-snow-n.png', large: 'lg-fg-open-snow-n.png'}
+            },
+            btnClose:{
+                id:"labBtnClose",
+                click:toggleState,
+                img:{small:"https://s.w-x.co/cl/prototype/dcp106-lw-im-stc/close_x.png", medium:"https://s.w-x.co/cl/prototype/dcp106-lw-im-stc/close_x.png", large:"https://s.w-x.co/cl/prototype/dcp106-lw-im-stc/close_x.png"},
+                imgProps:{type:"img", css:"" }
+            },
+            btnExpand:{
+        				id:"labBtnExpand",
+        				click:toggleState,
+        				img:{small:"https://s.w-x.co/cl/prototype/dcp106-lw-im-stc/expand.png", medium:"https://s.w-x.co/cl/prototype/dcp106-lw-im-stc/expand.png", large:"https://s.w-x.co/cl/prototype/dcp106-lw-im-stc/expand.png"},
+        				imgProps:{type:"img", css:"" }
+      			}
+        },
+        listeners:{resize:0, scroll:0},
+        logs:[],
+        imgs:{
+            loadCount:0,
+            loadTimer:0,
+            maxLoadTime:3000,
+            map:[],
+            loaded:[],
+            toLoad:[]
+        },
+        page:{ // init
+            aspectRatio:0,
+            clientHeight:0,
+            clientWidth:0,
+            contentWidth:0,
+            divId:"",
+            dpr: window.devicePixelRatio, // init
+            iframeId:"",
+            scrollTop:0
+        },
+        errors: [],
+        events: [],
+        ids: {
+            creative: "%ecid!",
+            lineItem: "%eaid!",
+            ad: "%%ADVERTISING_IDENTIFIER_PLAIN%%",
+            loc: "%%PATTERN:zip%%",
+            pos: "%%PATTERN:pos%%"
+        },
+        scope:"", // init
+        seenToday:false,
+        size:"small",
+        state:"closed",
+        test:{on:false, state:""},
+        time: {},
+        timer: {
+            close: 0,
+            resize: 0,
+            scroll: 0,
+            start: 0
+        },
+        tracking: {
+            a: "", // base analytics url for twc tracking
+            i: { // TODO - add impression tracking
+                tablet:"",
+                web:""
+            },
+            c: { // TODO - add click tracking,
+                dfpClick: "%%CLICK_URL_UNESC%%",
+                clickTag: "",
+                tablet:"",
+                web:"https://weather.com"
+            }
+        },
+        vars:{}
+    };
+/* NOTE - Location.hash test links
+https://weather.com/weather/today/l/30319#adstest-clear-open
+https://weather.com/weather/today/l/30319#adstest-clearnight-open
+https://weather.com/weather/today/l/30319#adstest-cloudy-open
+https://weather.com/weather/today/l/30319#adstest-cloudynight-open
+https://weather.com/weather/today/l/30319#adstest-rainy-open
+https://weather.com/weather/today/l/30319#adstest-rainynight-open
+https://weather.com/weather/today/l/30319#adstest-wintry-open
+https://weather.com/weather/today/l/30319#adstest-wintrynight-open
+https://weather.com/weather/today/l/30319#adstest-clear-closed
+https://weather.com/weather/today/l/30319#adstest-clearnight-closed
+https://weather.com/weather/today/l/30319#adstest-cloudy-closed
+https://weather.com/weather/today/l/30319#adstest-cloudynight-closed
+https://weather.com/weather/today/l/30319#adstest-rainy-closed
+https://weather.com/weather/today/l/30319#adstest-rainynight-closed
+https://weather.com/weather/today/l/30319#adstest-wintry-closed
+https://weather.com/weather/today/l/30319#adstest-wintrynight-closed
+*/
+
+
+    var unit;
+
+
+    var cl = (function () {
+    /*NERFED*/
+        addJson();
+        addJquery();
+        /*END NERFED*/
+
+        return {
+            log: function() {
+                var args = Array.prototype.slice.call(arguments);
+                if(lC.test.on){ // only show standard logs when testing
+                    console.log.apply(console, args);
+                }else{
+                    // push log info to lC and update parent
+                    lC.logs.push(args);
+                    // add obs to parent
+                    logInfo("config", lC);
+                }
+            },
+            warn: function() {
+                var args = Array.prototype.slice.call(arguments);
+                console.warn.apply(console, args);
+            },
+            error: function() {
+                var args = Array.prototype.slice.call(arguments);
+                console.error.apply(console, args);
+            }
+        }
+    }());
+
+    /*CORE*/
+    function initAd(){
+        try{
+            // lC inits
+            if (window.top != window.self) {
+                lC.scope = parent.window;
+            }else{
+                lC.scope = window;
+            }
+            // capture date & time
+            lC.time.date = new Date();
+            lC.time.loaded = lC.time.date.getTime();
+            lC.time.day = lC.time.date.getDay();
+            lC.time.dateStr = lC.time.date.toDateString();
+
+            /*// track init time
+             trackingFx("imp", "init_time", lC.time.loaded);*/
+            // request all tracking
+            //trackingInit();
+
+            // frequency cap test
+            lC.seenToday = freqCheck();
+            // should it be open or closed?
+            if(lC.seenToday){
+                lC.state = "closed";
+            }else{
+                lC.state = "open";
+            }
+
+            // handle adaptor & test b/c those can impact everything that
+            // happens in the rest of the code.
+            if(lC.adaptor.on == true){
+                // in this case we just need a cond
+                lC.adaptor.cond = initAdaptor();
+                cl.log("Adaptor on", lC.adaptor);
+            }
+
+      // FIXME - find new way to set test conditions
+      // check location.hash for #adstest
+            lC.test.on = hashTestCheck();
+
+            // get all pertinent info from parent page - lC.size is set
+            getParentInfo();
+
+      // HACK - originally thought client provided tracking for Web & Tablet so additional logic was added to request based on initial load width. However, tablet tracking was provided for Tablet App which is handled via DFP Template. Therefore we just need to use web tracking for everything in this code.
+
+            // set tracking - special case. See above comment.
+                lC.tracking.c.clickTag = lC.tracking.c.web;
+                document.getElementById('labTracking').src = lC.tracking.i.web;
+
+
+                cl.log("tracking as web", lC.tracking.i.web, lC.tracking.c.web);
+
+            // find correct imgs based on size and cond
+            var uniqueImgs = imgSelection();
+
+            // load imgs
+            imgPreload(uniqueImgs); // calls buildAd when complete
+
+            // attach key els to parent
+            addToParent();
+
+        }catch(err){
+            logError(err, true);
+        }
+    }
+
+    function initAdaptor(){
+        try{ // possible - cond: clear, clearnight, cloudy, cloudynight, rainy, rainynight, wintry, wintrynight
+            lC.adaptor.sCond = ""; // string to return
+            // get icon from observation
+            lC.adaptor.icon = parent.TWC.adUtils.data.observation.data.vt1observation.icon;
+            console.log(parent.TWC.adUtils)
+            console.log(parent.TWC.adUtils.data)
+            console.log(parent.TWC.adUtils.data.observation)
+            console.log(lC.adaptor.icon)
+            lC.adaptor.adCond = getAdCond(lC.adaptor.icon); // returns an obj. b = bucket.
+            // sort based on bucket returned
+            switch (lC.adaptor.adCond.b){
+                case "clear":
+                    lC.adaptor.sCond = "clear";
+                    break;
+                case "rain":
+                case "stormy":
+                    lC.adaptor.sCond = "rainy";
+                    break;
+                case "wintry":
+                    lC.adaptor.sCond = "wintry";
+                    break;
+                default:
+                    lC.adaptor.sCond = "cloudy";
+                    break;
+            }
+
+            lC.adaptor.dayNight = getDayOrNight();
+
+            // if it's night, then add night to the cond name
+            if(lC.adaptor.dayNight == "night"){
+                lC.adaptor.sCond += "night";
+            }
+
+
+            return lC.adaptor.sCond;
+        }catch(err){
+            logError(err, true);
+        }
+    }
+
+    function addToParent(){
+        try{
+      // NERFED
+      //remove margin from hero background below bbg
+            jq('.hero.hero-background.layout-centered').css('padding-top','0px');
+            jq('.hero.hero-background.layout-centered').css('margin-top','-5px');
+      // hide region above nav bar
+            jq('.region.region-top').css('display','none');
+            jq('.region.region-header .wx-adWrapper').css('display','none'); //Changed added 03.13.2018
+            jq('.twc-header-wrap').css('z-index','2');
+      // END NERFED
+
+            jq('.region-topAds').css('display','none'); // Added this to remove the white space above the nav - wodev comment
+            jq('.region-contentTop ').css('display','none'); // Added this to remove the blank space above the creative - wodev comment
+            // BG & CSS
+            var css = document.getElementById("labCSS").cloneNode(true);
+            jq("head").append(css);
+      // NERFED - original setup cloned labBG to parent. Now labBG always exists on parent.
+            // var fullBG = document.getElementById("labBG").cloneNode(true);
+            // jq("#wx-hero-wrap").prepend(fullBG);
+
+      // labBG always exists on parent so just clone contents from local document.
+            var fullBG = document.getElementById("labBG").innerHtml;
+            jq("#labBG").prepend(fullBG);
+      // END NERFED
+
+            jq("#wx-hero-content").parent().css({"margin": "0px auto"}); // This is added to remove the margin at the top of creative holder -  wodev comment
+
+            // CONTENT
+            var content = document.getElementById("labContent").cloneNode(true);
+            // add content structure to parent & remove top padding
+            jq("#wx-hero-content").prepend(content);
+            jq("#wx-hero-content").css("padding-top", 0);
+
+
+
+            // hide ad slot
+            jq(lC.page.divId).css("display", "none");
+
+            // removes bottom margin from alerts bar
+            jq("[data-module-name='gm_alerts']").css("margin", 0)
+        }catch(err){
+            logError(err, true);
+        }
+    }
+
+
+    // var poster;
+    var iOS = /iPad|iPhone|iPod/.test(navigator.platform);
+    var sreenWidth;
+
+    function buildAd(){
+
+        try {
+            // build up the lA object with pertinent props from lC
+            lA.alt = lC.alt;
+            lA.dir = lC.dir;
+            lA.name = lC.name;
+            lA.size = lC.size;
+            lA.state = lC.state;
+            lA.video = lC.video;
+            lA.cond = lC.adaptor.cond;
+            lA.e = {};
+            // loop through lC.els and hook things up
+            for(var prop in lC.els){
+                var el = lC.els[prop];
+                //cl.log(prop, el);
+                // add each prop to labAd with jq ref
+                lA.e[prop] = jq("#"+el.id);
+                // add click handler if it has one
+                if(el.hasOwnProperty('click')){
+                    //cl.log(prop, "click added", el.click);
+                    lA.e[prop].click(el.click);
+                }
+                if(el.hasOwnProperty('mouseover')){
+                    //cl.log(prop, "mouseover added", el.mouseover);
+                    lA.e[prop].mouseover(el.mouseover);
+                }
+                if(el.hasOwnProperty('mouseout')){
+                    //cl.log(prop, "mouseout added", el.mouseout);
+                    lA.e[prop].mouseout(el.mouseout);
+                }
+                // add cond based className if present - allows for adjusting CSS per cond. Ex: cloudynight
+                if(el.hasOwnProperty('className')){
+                    //cl.log(prop, "click added", el.click);
+                    lA.e[prop].addClass(lC.adaptor.cond);
+                }
+            }
+
+
+            // apply imgs based on size
+            setImgs(lA.size);
+
+            // NERFED  - apply throttled resize
+            // lC.throttledResize = parent.window['_'].throttle(monitorResize, 50, { 'trailing': false });
+            // parent.window.addEventListener("resize", lC.throttledResize);
+      parent.window.addEventListener("resize", monitorResize);
+      // END NERFED
+
+            // open or close based on state
+            if(lC.state == "open"){
+                adOpen();
+            }else{
+                adClose();
+            }
+
+            cl.log("buildAd", lC, lA);
+            // add obs to parent
+            logInfo("config", lC);
+        }catch (err) {
+            logError(err, true);
+        }
+    }
+
+
+// NERFED?? - all new adOpen and adClose functions? Why?
+function adOpen(){
+    try{
+        var iOS = /iPad|iPhone|iPod/.test(navigator.platform);
+        // adjust open height based on hType - fixed or pct
+        var bgStyle = {"height":(lC.els.bg.hOpen)+"px", "transition":"height "+ lC.anim.timeToOpen +" "+ lC.anim.easeOpen};
+        var cStyle = {"height":(lC.els.content.hOpen)+"px","transition":"height "+ lC.anim.timeToOpen +" "+ lC.anim.easeOpen};
+
+        if(lC.els.content.hType == "pct"){
+            var pctH = lC.page.clientHeight * lC.els.content.hPctOpen;
+            var pctHbg = lC.page.clientHeight * lC.els.bg.hPctOpen;
+            cStyle = {"height":(pctH)+"px","transition":"height "+ lC.anim.timeToOpen +" "+ lC.anim.easeOpen};
+            bgStyle = {"height":(pctHbg)+"px", "transition":"height "+ lC.anim.timeToOpen +" "+ lC.anim.easeOpen};
+        }
+
+        // change height on content div & bg div
+        lA.e.bg.css(bgStyle);
+        lA.e.content.css(cStyle);
+
+        // hide close & reveal open
+        lA.e.contentClosed.css({ "display":"none" });
+        lA.e.contentClosed.animate(
+                { "opacity":0 },
+                300,
+                "swing",
+                function(){
+                    lA.e.contentOpen.css({ "display":"block" });
+                    lA.e.contentOpen.animate({
+                        "opacity":"1"
+                    },500);
+                });
+
+                //--------------------------video----------------------------------------------
+
+
+             //--------------------------video end----------------------------------------------------------
+        // simplify scroll operation
+        parent.window.addEventListener("scroll", monitorScroll, false);
+    }catch(err){
+        logError(err, true);
+    }
+}
+
+    function adClose(){
+        try{
+            // remove scroll handler
+            parent.window.removeEventListener("scroll", monitorScroll, false);
+            // change height on content div & bg div
+            var bgCSS = {"height":(lC.els.bg.hClosed)+"px", "transition":"height "+ lC.anim.timeToClose +" "+ lC.anim.easeClose};
+            /*if(lC.adaptor.dayNight == "day") {
+             bgCSS = {"height":(lC.els.bg.hClosed)+"px", "transition":"height "+ lC.anim.timeToClose +" "+ lC.anim.easeClose};
+             }*/
+            bgCSS = {"height":(lC.els.bg.hClosed)+"px", "transition":"height "+ lC.anim.timeToClose +" "+ lC.anim.easeClose};
+
+            lA.e.bg.css(bgCSS);
+            lA.e.content.css({
+                //"height":(.60*sz.height)+"px"
+                "height":(lC.els.content.hClosed)+"px",
+                "transition":"height "+ lC.anim.timeToClose +" "+ lC.anim.easeClose
+            });
+
+            lA.e.contentOpen.css({ "display":"none" });
+            lA.e.contentOpen.animate(
+                    { "opacity":0 },
+                    300,
+                    "swing",
+                    function(){
+                        lA.e.contentClosed.css({ "display":"block" });
+                        lA.e.contentClosed.animate({
+                            "opacity":"1"
+                        },500);
+                    });
+
+        }catch(err){
+            logError(err, true);
+        }
+    }
+
+    function setImgs(size){
+        try{
+            // loop through lC.imgs.map and assign based on imgType
+            // map always has all img sizes - not just preloaded ones
+            var i,o;
+            var map = lC.imgs.map;
+            var len = map.length;
+            for(i=0; i < len; i++) {
+                o = map[i];
+                //cl.log(myName, size, o);
+                //Added this condition to determine which backgound should be load(expand bg or collapse bg) - wodev comment
+                if(lC.state == "closed"){
+                  if (o.type == "bgClose") {
+                      lA.e[o.prop].css({
+                          "background-image": "url('" + lA.dir + o[size] + "')"
+                      });
+                  }
+                }else{
+                  if (o.type == "bg") {
+                      lA.e[o.prop].css({
+                          "background-image": "url('" + lA.dir + o[size] + "')"
+                      });
+                  }
+                }
+                if (o.type == "img") {
+                    if(o[size].indexOf("://") == -1){
+                        lA.e[o.prop].attr("src", lA.dir + o[size]);
+                    }else{
+                        lA.e[o.prop].attr("src", o[size]);
+                    }
+                    // FIXME - add draggable attribute to inline imgs
+                    lA.e[o.prop].attr("draggable", "false");
+                } else {
+                    cl.log("type: unknown");
+                }
+            }
+        }catch(err){
+            logError(err, true);
+        }
+    }
+
+
+
+    function showDefault(reason){
+        try{
+            lC.defaultReason = reason;
+            //lA = lC[lC.size];
+            lA.name = lC.name;
+            lA.alt = lC.alt;
+            lA.dir = lC.dir;
+      // NERFED?? - wx-hero-content
+            jq("#wx-hero-content").css("padding-top", 0); // changed the padding value from 10px to 0px - wodev comment
+            jq("#labBG").css("background-position", "50% 0%");
+            // add padding back in
+            cl.log(lC, "showDefault");
+            // add obs to parent
+            logInfo("config", lC);
+        }catch(err){
+            logError(err, false);
+        }
+    }
+
+    function toggleState(){ // toggles between open & closed
+        try {
+
+          //Added some codes here to change the background when changing state - wodev comment
+
+          var i,o;
+          var map = lC.imgs.map;
+          var len = map.length;
+
+            if (lC.state == "open"){
+
+              for(i=0; i < len; i++) {
+                  o = map[i];
+                  if (o.type == "bgClose") {
+                      lA.e[o.prop].css({
+                          "background-image": "url('" + lA.dir + o[lA.size] + "')"
+                      });
+                  }
+              }
+                lC.state = lA.state = "closed";
+                adClose();
+            }else{
+
+              for(i=0; i < len; i++) {
+                  o = map[i];
+                  if (o.type == "bg") {
+                      lA.e[o.prop].css({
+                          "background-image": "url('" + lA.dir + o[lA.size] + "')"
+                      });
+                  }
+              }
+
+                lC.state = lA.state = "open";
+                adOpen();
+            }
+            //cl.log("toggleState: " + event.target.id, lC.state);
+        }catch (err) {
+            logError(err, true);
+        }
+    }
+
+    /*UTILITY FUNCTIONS*/
+    function debounce(func, wait, immediate) {
+        var timeout;
+        return function() {
+            var context = this, args = arguments;
+            var later = function() {
+                timeout = null;
+                if (!immediate) func.apply(context, args);
+            };
+            var callNow = immediate && !timeout;
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+            if (callNow) func.apply(context, args);
+        };
+    }
+
+    function exitClick(event){
+        try {
+            event.preventDefault();
+            var id = event.target.id;
+            var url = lC.tracking.c.clickTag;
+            var target = "_blank";
+            cl.log(id, url, lC.els[id]);
+            window.open(lC.tracking.c.dfpClick + url, target);
+            //track it
+            //lA.fns.trackingFx("click", "exitClick_" + id);
+        }
+        catch (err) {
+            logError(err, false);
+        }
+    }
+
+    /*jStorage start*/
+    function freqCheck(){
+        try {
+            // check freq cap from jStorage - will return an array if found. Otherwise returns none.
+            var allLabAds = parent.jQuery.jStorage.get("aLabAds", "none");
+            var ad = {
+                name: lC.name,
+                viewDate: lC.time.dateStr,
+                count: 1
+            }; // create a new object to store in aLabAds
+            var seenToday = false;
+            if (allLabAds == "none") {
+                // create new array for storing lC objects in jStorage
+                var aLabAds = [];
+                aLabAds.push(ad);
+                cl.log("jStorage adding ", ad);
+                // store in jStorage
+                freqUpdate(aLabAds);
+                return seenToday;
+            } else {
+                // loop through aLabAds looking for match
+                var len = allLabAds.length;
+                for (var i = 0; i < len; i++) {
+                    if (allLabAds[i].viewDate == lC.time.dateStr && allLabAds[i].name == lC.name) {
+                        seenToday = true;
+                        allLabAds[i].count++; // increment count if weve already seen this one
+                        cl.log("jStorage updating ", allLabAds[i]);
+                        freqUpdate(allLabAds);
+                    }
+                }
+                // if not seenToday, add this new one to jStorage
+                if (!seenToday) {
+                    allLabAds.push(ad);
+                    cl.log("jStorage new today ", ad);
+                    freqUpdate(allLabAds);
+                }
+                return seenToday;
+            }
+        }catch (err) {
+            logError(err, true);
+        }
+    }
+
+    function freqUpdate(aAds){
+        try {
+            parent.jQuery.jStorage.set("aLabAds", aAds); // scope
+            parent.jQuery.jStorage.setTTL("aLabAds", 30 * 24 * 60 * 60 * 1000); // scope
+        }catch (err) {
+            logError(err, false);
+        }
+    }
+    /*jStorage end*/
+
+    function getAdCond(wxIcon){
+        var adCond;
+        switch(String(wxIcon)){ // convert icon to string
+            case "0": adCond = {i:"0", b:"stormy", d:"Tornado", t:"na"};break;
+            case "1": adCond = {i:"1", b:"stormy", d:"Tropical Storm", t:"na"};break;
+            case "2": adCond = {i:"2", b:"stormy", d:"Hurricane", t:"na"};break;
+            case "3": adCond = {i:"3", b:"stormy", d:"Strong Thunderstorms", t:"na"};break;
+            case "4": adCond = {i:"4", b:"stormy", d:"Thunderstorms", t:"na"};break;
+            case "5": adCond = {i:"5", b:"wintry", d:"Rain and Snow", t:"na"};break;
+            case "6": adCond = {i:"6", b:"rain", d:"Rain and Sleet", t:"na"};break;
+            case "7": adCond = {i:"7", b:"wintry", d:"Wintry Mix", t:"na"};break;
+            case "8": adCond = {i:"8", b:"wintry", d:"Freezing Drizzle", t:"na"};break;
+            case "9": adCond = {i:"9", b:"rain", d:"Drizzle", t:"na"};break;
+            case "10": adCond = {i:"10", b:"wintry", d:"Freezing Rain", t:"na"};break;
+            case "11": adCond = {i:"11", b:"rain", d:"Showers", t:"na"};break;
+            case "12": adCond = {i:"12", b:"rain", d:"Rain", t:"na"};break;
+            case "13": adCond = {i:"13", b:"wintry", d:"Flurries", t:"na"};break;
+            case "14": adCond = {i:"14", b:"wintry", d:"Snow Showers", t:"na"};break;
+            case "15": adCond = {i:"15", b:"wintry", d:"Blowing Snow", t:"na"};break;
+            case "16": adCond = {i:"16", b:"wintry", d:"Snow", t:"na"};break;
+            case "17": adCond = {i:"17", b:"rain", d:"Hail", t:"na"};break;
+            case "18": adCond = {i:"18", b:"rain", d:"Sleet", t:"na"};break;
+            case "19": adCond = {i:"19", b:"lowvis", d:"Dust", t:"na"};break;
+            case "20": adCond = {i:"20", b:"lowvis", d:"Fog", t:"na"};break;
+            case "21": adCond = {i:"21", b:"lowvis", d:"Haze", t:"na"};break;
+            case "22": adCond = {i:"22", b:"lowvis", d:"Smoke", t:"na"};break;
+            case "23": adCond = {i:"23", b:"windy", d:"Breezy", t:"na"};break;
+            case "24": adCond = {i:"24", b:"windy", d:"Windy", t:"na"};break;
+            case "25": adCond = {i:"25", b:"wintry", d:"Frigid", t:"na"};break;
+            case "26": adCond = {i:"26", b:"cloudy", d:"Cloudy", t:"na"};break;
+            case "27": adCond = {i:"27", b:"cloudy", d:"Mostly Cloudy", t:"night"};break;
+            case "28": adCond = {i:"28", b:"cloudy", d:"Mostly Cloudy", t:"day"};break;
+            case "29": adCond = {i:"29", b:"cloudy", d:"Partly Cloudy", t:"night"};break;
+            case "30": adCond = {i:"30", b:"cloudy", d:"Partly Cloudy", t:"day"};break;
+            case "31": adCond = {i:"31", b:"clear", d:"Clear", t:"night"};break;
+            case "32": adCond = {i:"32", b:"clear", d:"Sunny", t:"day"};break;
+            case "33": adCond = {i:"33", b:"clear", d:"Mostly Clear", t:"night"};break;
+            case "34": adCond = {i:"34", b:"clear", d:"Mostly Sunny", t:"day"};break;
+            case "35": adCond = {i:"35", b:"rain", d:"Mixed Rain/Hail", t:"na"};break;
+            case "36": adCond = {i:"36", b:"clear", d:"Hot", t:"day"};break;
+            case "37": adCond = {i:"37", b:"rain", d:"Isolated Thunderstorms", t:"day"};break;
+            case "38": adCond = {i:"38", b:"rain", d:"Scattered Thunderstorms", t:"day"};break;
+            case "39": adCond = {i:"39", b:"rain", d:"Scattered Showers", t:"day"};break;
+            case "40": adCond = {i:"40", b:"rain", d:"Heavy Rain", t:"na"};break;
+            case "41": adCond = {i:"41", b:"wintry", d:"Scattered Snow Showers", t:"na"};break;
+            case "42": adCond = {i:"42", b:"wintry", d:"Heavy Snow", t:"na"};break;
+            case "43": adCond = {i:"43", b:"wintry", d:"Blizzard", t:"na"};break;
+            case "44": adCond = {i:"44", b:"na", d:"Not Available", t:"na"};break;
+            case "45": adCond = {i:"45", b:"rain", d:"Scattered Showers", t:"night"};break;
+            case "46": adCond = {i:"46", b:"wintry", d:"Scattered Snow Showers", t:"night"};break;
+            case "47": adCond = {i:"47", b:"stormy", d:"Scattered Thunderstorms", t:"night"};break;
+            default: adCond = {i:"na", b:"na", d:"Not Available", t:"na"};break;
+        }
+        return adCond;
+    }
+
+    function getDayOrNight(){
+        try{
+            var dayPart = "day";
+            // for now day will be from 6am to 8pm
+            lC.adaptor.now = new Date();
+            lC.adaptor.hour = lC.adaptor.now.getHours();
+            if(lC.adaptor.hour >= 6 && lC.adaptor.hour <= 20){
+                dayPart = "day";
+            }else{
+                dayPart = "night";
+            }
+
+      // FIXME - improve day/night using timestamp instead of Date object
+
+            /* // figure out day/night based on sunrise/sunset
+             // determine day or night by comparing todays sunset time to the current time
+             // if current time (now) is greater than sunset, it's night
+             var setStr = parent.TWC.adUtils.data.dailyForecast.data.vt1dailyForecast.sunset[0];
+             var riseStr = parent.TWC.adUtils.data.dailyForecast.data.vt1dailyForecast.sunrise[0];
+             // remove the tz offset so we can create Date obj
+             lC.adaptor.sunsetStr = setStr.substr(0, setStr.lastIndexOf('-'));
+             lC.adaptor.sunriseStr = riseStr.substr(0, riseStr.lastIndexOf('-'));
+             // create Date objects for comparison
+             lC.adaptor.sunset = new Date(lC.adaptor.sunsetStr);
+             lC.adaptor.sunrise = new Date(lC.adaptor.sunriseStr);
+
+             lC.adaptor.now = new Date();
+             //         cl.log(lC.adaptor.now >= lC.adaptor.sunrise, "after sunrise");
+             //         cl.log(lC.adaptor.now <= lC.adaptor.sunset, "before sunset");
+             //         cl.log(lC.adaptor.now >= lC.adaptor.sunrise && lC.adaptor.now <= lC.adaptor.sunset, "before sunset");
+             if((lC.adaptor.now >= lC.adaptor.sunrise) && (lC.adaptor.now <= lC.adaptor.sunset)){
+             dayPart = "day";
+             }else{
+             dayPart = "night";
+             }*/
+            return dayPart;
+        }catch(err){
+            logError(err, false);
+        }
+    }
+
+    function getPageSizes(){
+        try { // return obj with width and size label
+            var w = {width:jq(lC.scope).width(), height:jq(lC.scope).height(), label:""};
+            // Adjusted the ranges value according to breakpoints provided - wodev comment
+            if(w.width >= 1201){
+                w.label = "large";
+            } else if(w.width <= 1200 && w.width >= 985){
+                w.label = "medium";
+            } else {
+                w.label = "small";
+            }
+            return w;
+        }
+        catch (err) {
+            logError(err, false);
+        }
+    }
+
+    function getParentInfo(){
+        try {
+            // NERFED - today_wxcard becomes today_nowcard
+            // content width of wx card map module
+            lC.page.contentWidth = jq('.today_nowcard').width();
+            // END NERFED
+            // from document.documentElement
+            var w = getPageSizes();
+            lC.page.clientWidth = w.width;
+            lC.page.clientHeight = jq(parent.window).height();
+            lC.page.aspectRatio = lC.page.clientWidth / lC.page.clientHeight;
+            // name the size based on measurements
+            lC.size = w.label;
+            if(lC.size == "large" || lC.size == "medium"){
+        // NERFED - wrapper_WX_WindowShade becomes WX_WindowShadeToday
+                lC.page.divId = "#WX_WindowShadeToday";
+            } else {
+                lC.page.divId = "#wrapper_MW_Position1";
+            }
+            // get parent container height
+            lC.page.divIdHeight = jq(lC.page.divId).height();
+            // capture iframe id
+            lC.page.iframeId = jq(lC.page.divId + " iframe").attr("id");
+
+            //cl.log("lC.page", lC.page);
+        }  catch (err) {
+            logError(err, true);
+        }
+    }
+
+    function hashTestCheck() {
+        try {
+            // check top level location.hash for #adstest
+            lC.test.hash = top.window.location.hash.substring(1);
+            // expected format of hash value is #adstest-condition-state
+            lC.test.HashParts = lC.test.hash.split("-");
+            // if the zero index === adstest, we go into test mode
+            if (lC.test.HashParts[0] === "adstest") {
+                // override lC.adaptor.cond & lC.state & empty dfpClick macro
+                lC.adaptor.cond = lC.test.HashParts[1];
+                lC.state = lC.test.HashParts[2];
+                lC.tracking.c.dfpClick = "";
+                cl.log("Test on", lC.test);
+                return true;
+            } else { // return false because we are not in test mode
+                return false;
+            }
+        }
+        catch (err) {
+            logError(err, false);
+            return false;
+        }
+    }
+
+    function imgPreload(aImgs){
+        try{
+            var len = aImgs.length;
+            // loop through and load valid paths
+            for(var i = 0; i < len; i++ ){
+                var imgObj = new Image();
+                if(aImgs[i].indexOf("://") == -1){
+                    // add dir when its only the img name
+                    imgObj.src = lC.dir + aImgs[i];
+                }else{
+                    // use full path
+                    imgObj.src = aImgs[i];
+                }
+                imgObj.onload = imgLoaded;
+            }
+            // setTimeout for max allowable wait on loading
+            lC.imgs.loadTimer = window.setTimeout(function(){
+                // terminate any future callbacks
+                imgLoaded = null;
+                // showDefault
+                showDefault("imgPreload timed out after "+ lC.imgs.maxLoadTime);
+            }, lC.imgs.maxLoadTime);
+        }catch(err){
+            logError(err, true);
+        }
+    }
+
+    function imgLoaded(){
+        try{
+            // increment count
+            lC.imgs.loadCount++;
+            lC.imgs.loaded.push(this);
+            if(lC.imgs.loadCount == lC.imgs.toLoad.length ){
+                clearInterval(lC.imgs.loadTimer);
+                //cl.log("all images loaded", lC.imgs.toLoad);
+                buildAd();
+            }
+        }catch(err){
+            logError(err, true);
+        }
+    }
+
+    function imgSelection(){
+        try {
+            // iterate lC.els, call imgSelection for els with img prop
+            // stores uniques in lC.imgs.toLoad;
+            // also store a mapping obj to use in setImgs
+            var el, selected;
+            for(var prop in lC.els){
+                el = lC.els[prop];
+                if(el.hasOwnProperty("img")){ // make sure we at least an img
+                    // create map with all img props for use in setImgs
+                    // map needs both sizes and duplicates
+                    var mapObj = {
+                        css:el.imgProps.css,
+                        id:el.id,
+                        prop:prop,
+                        type:el.imgProps.type
+                    };
+                    // now check for cond property
+                    if(el.hasOwnProperty(lC.adaptor.cond)){
+                        selected = el[lC.adaptor.cond][lC.size];
+                        mapObj.small = el[lC.adaptor.cond]['small']; // added this to load small images - wodev comment
+                        mapObj.medium = el[lC.adaptor.cond]['medium'];
+                        mapObj.large = el[lC.adaptor.cond]['large'];
+                    }else{ // else, use default img
+                        selected = el['img'][lC.size];
+                        mapObj.small = el['img']['small']; // added this to load small default images - wodev comment
+                        mapObj.medium = el['img']['medium'];
+                        mapObj.large = el['img']['large'];
+                    }
+
+                    lC.imgs.map.push(mapObj);
+                    // check for existence in lC.imgs.toLoad
+                    if(lC.imgs.toLoad.indexOf(selected) == -1){
+                        lC.imgs.toLoad.push(selected);
+                        //cl.log(prop, typeof prop, el, selected);
+                    }else{
+                        //cl.log(prop, "img duplicate:", selected);
+                    }
+                }else{
+                    //cl.log(prop + " has no images");
+                }
+            }
+            return lC.imgs.toLoad;
+        }catch (err) {
+            logError(err, true);
+        }
+    }
+
+    function jq(selector){
+        try {
+            if (window.top != window.self) {// use parent.jQuery if NOT top
+                if (!selector) {
+                    return parent.jQuery;
+                } else {
+                    return parent.jQuery(selector);
+                }
+            }else{ // else use loaded jQuery if IS top
+                if (!selector) {
+                    return parent.jQuery;
+                } else {
+                    return parent.jQuery(selector);
+                }
+            }
+        }
+        catch (err) {
+            logError(err, true);
+        }
+    }
+
+    function logError(err, fatal){
+        try {
+            cl.error(err, fatal);
+            lC.errors.push(err);
+            if (fatal) {
+                showDefault("lab fatal error!");
+            }
+        }catch (err) {
+            cl.error(err, fatal, "error in logError fn");
+            lC.errors.push(err);
+            showDefault("lab fatal on logError");
+        }
+    }
+
+    function logInfo(sName, obj){
+        try{
+            parent.labInfo = parent.labInfo || {};
+            parent.labInfo[sName] = obj;
+        }catch(err){
+            logError(err, false);
+        }
+    }
+
+    function monitorResize(){
+        try {
+            // re-check screen size & compare to previous page size
+            // if label changed, load new imgs and set new css
+            var w = getPageSizes();
+            if(w.label != lC.size){
+        // TODO - remove console log for size changes
+                console.log("size change to " + w.label);
+                lC.size = lA.size = w.label;
+                // if(lC.size != "small"){ - removed this since we need small breakpoints - wodev comment
+                    setImgs(w.label);
+                    //adjustCSS(w.label);
+                // }else{
+                    //adjustCSS(w.label);
+                // }
+            }
+        }catch (err) {
+            logError(err, false);
+        }
+    }
+
+    function monitorScroll(){
+        try {
+            // cl.log("monitorScroll", parent.window.scrollY);
+            if(parent.window.scrollY >= 60){
+                // remove listener then toggleState
+                parent.window.removeEventListener("scroll", monitorScroll, false);
+                toggleState();
+            }
+        }catch (err) {
+            logError(err, true);
+        }
+    }
+
+    function throttle (callback, limit) {
+        var wait = false;                  // Initially, we're not waiting
+        return function () {               // We return a throttled function
+            if (!wait) {                   // If we're not waiting
+                callback.call();           // Execute users function
+                wait = true;               // Prevent future invocations
+                setTimeout(function () {   // After a period of time
+                    wait = false;          // And allow future invocations
+                }, limit);
+            }
+        }
+    }
+
+  /*NERFED*/
+    function addJson(){
+        var insertBefore = window.top.document.getElementById('labBG');
+
+        if(!(document.getElementById('jsonFragmentScript'))){
+            //this code adds json2 to the parent DOM just in case the creative needs it
+            var jsonFragment = document.createElement('script');
+            jsonFragment.id = 'jsonFragmentScript';
+            jsonFragment.src = 'https://cdnjs.cloudflare.com/ajax/libs/json2/20110223/json2.js';
+            parent.document.body.insertBefore(jsonFragment, insertBefore.childNodes[0]);
+        }
+    }
+
+    function addJquery(){
+        var promise = new Promise(function(resolve, reject) {
+
+            var insertBefore = window.top.document.getElementById('labBG');
+
+            //this code adds jquery to the parent DOM just in case the creative needs it
+            var fragment = document.createElement('script');
+            fragment.id = 'jQueryScript';
+            fragment.src = 'https://s.w-x.co/cl/jquery/finalgzippedversion/jqueryJstorageCombined.js';
+
+            if(window.top.jQuery){
+                resolve(fragment);
+                return;
+            }
+
+            fragment.addEventListener('load', function() {
+                resolve(fragment);
+            }, false);
+
+            fragment.addEventListener('error', function() {
+                reject(fragment);
+                cl.log("addJquery error", fragment);
+            }, false);
+
+            parent.document.body.insertBefore(fragment, insertBefore.childNodes[1]);
+
+        });
+
+        Promise.all([promise]).then(function (){
+            lC.timer.start = setTimeout(initAd, 50);
+        });
+    }
+
+
+  // init delay to allow time for adUtils.data to return
+  // lC.timer.start = setTimeout(initAd, 1750);
+
+  /*END NERFED*/
+
+  // start wodev comment
+  // * Modified the labfgOpen css properties
+  // * Modified the labfgClose css properties
+  // * Removed '#labCopyClosed' on css because it's not necessary.
+  // * Removed image tag above labBG div bec. I think it's not necessary.
+  // * Removed 'SCROLL FOR WEATHER' tab
+  // * Removed the max-width rule that forces our Web IM creative to disappear on screens wider than 1980px
+  // * Changed the expand and close button assets.
+  //  end wodev comment
+
+</script>
+</body>
+
+</html>
